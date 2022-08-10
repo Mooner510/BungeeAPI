@@ -7,7 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 
 public class BungeeAPI {
-    public void sendBungeeMessage(String message) {
+    public static void sendBungeeMessage(String message) {
         try(
                 ByteArrayOutputStream b = new ByteArrayOutputStream();
                 DataOutputStream out = new DataOutputStream(b)
@@ -28,7 +28,7 @@ public class BungeeAPI {
         }
     }
 
-    public void sendBungeeMessage(String player, String message) {
+    public static void sendBungeeMessage(String player, String message) {
         try(
                 ByteArrayOutputStream b = new ByteArrayOutputStream();
                 DataOutputStream out = new DataOutputStream(b)
@@ -49,7 +49,7 @@ public class BungeeAPI {
         }
     }
 
-    public void sendBungeePlayer(String player, ServerType type) {
+    public static void sendBungeePlayer(String player, ServerType type) {
         try(
                 ByteArrayOutputStream b = new ByteArrayOutputStream();
                 DataOutputStream out = new DataOutputStream(b)
@@ -70,7 +70,7 @@ public class BungeeAPI {
         }
     }
 
-    public void sendForward(String message) {
+    public static void sendForward(String message) {
         try(
                 ByteArrayOutputStream b = new ByteArrayOutputStream();
                 DataOutputStream out = new DataOutputStream(b)
