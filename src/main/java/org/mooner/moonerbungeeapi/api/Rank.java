@@ -17,7 +17,7 @@ public enum Rank {
         this.permission = permission;
     }
 
-    private static String chat(String msg) {
+    public static String chat(String msg) {
         return ChatColor.translateAlternateColorCodes('&', msg);
     }
 
