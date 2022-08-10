@@ -96,6 +96,8 @@ public class BungeeAPI {
             return ServerType.MAIN_SERVER;
         } else if(port == 1511) {
             return ServerType.SURVIVAL_SERVER;
+        } else if(port == 1599) {
+            return ServerType.SPAWN_SERVER;
         }
         return ServerType.OTHER;
     }

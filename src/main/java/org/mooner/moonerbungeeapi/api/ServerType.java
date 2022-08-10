@@ -3,6 +3,7 @@ package org.mooner.moonerbungeeapi.api;
 public enum ServerType {
     MAIN_SERVER("메인서버"),
     SURVIVAL_SERVER("야생서버"),
+    SPAWN_SERVER("스폰서버"),
     OTHER("알 수 없음");
 
     private final String tag;

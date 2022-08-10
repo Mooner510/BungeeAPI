@@ -1,7 +1,9 @@
 package org.mooner.moonerbungeeapi.db;
 
+import org.bukkit.Statistic;
 import org.bukkit.entity.Player;
 import org.mooner.moonerbungeeapi.MoonerBungee;
+import org.mooner.moonerbungeeapi.api.BungeeAPI;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,9 +35,9 @@ public class PlayTimeDB {
                 PreparedStatement s = c.prepareStatement(
                         "CREATE TABLE IF NOT EXISTS PlayTime (" +
                                 "uuid TEXT NOT NULL UNIQUE," +
-                                "time INTEGER NOT NULL," +
-                                "lastJoin INTEGER," +
-                                "lastLeave INTEGER," +
+                                "main INTEGER," +
+                                "sv INTEGER," +
+                                "spawn INTEGER" +
                                 "PRIMARY KEY(uuid))")
         ) {
             s.execute();
@@ -50,14 +52,14 @@ public class PlayTimeDB {
         final long delayed = time - lastJoin.get(p.getUniqueId());
         try (
                 Connection c = DriverManager.getConnection(CONNECTION);
-                PreparedStatement s = c.prepareStatement("SELECT time FROM PlayTime WHERE uuid=?")
+                PreparedStatement s = c.prepareStatement("SELECT (main, sv, spawn) FROM PlayTime WHERE uuid=?")
         ) {
             s.setString(1, p.getUniqueId().toString());
             try (
                     final ResultSet r = s.executeQuery()
             ) {
                 if (r.next()) {
-                    return r.getLong(1) + delayed;
+                    return r.getLong(1) + r.getLong(2) + r.getLong(3) + delayed;
                 }
             }
         } catch (SQLException e) {
@@ -67,40 +69,47 @@ public class PlayTimeDB {
     }
 
     public void join(Player p) {
-        final long time = System.currentTimeMillis();
-        lastJoin.put(p.getUniqueId(), time);
-        try (
-                Connection c = DriverManager.getConnection(CONNECTION);
-                PreparedStatement s2 = c.prepareStatement("UPDATE PlayTime SET lastJoin=? WHERE uuid=?");
-                PreparedStatement s = c.prepareStatement("INSERT INTO PlayTime VALUES(?, ?, ?, ?)")
-        ) {
-            s2.setLong(1, time);
-            s2.setString(2, p.getUniqueId().toString());
-            if(s2.executeUpdate() == 0) {
-                s.setString(1, p.getUniqueId().toString());
-                s.setLong(2, 0);
-                s.setLong(3, time);
-                s.setNull(4, Types.INTEGER);
-                s.executeUpdate();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        lastJoin.put(p.getUniqueId(), System.currentTimeMillis());
     }
 
     public void quit(Player p) {
-        final long time = System.currentTimeMillis();
-        final long delayed = time - lastJoin.get(p.getUniqueId());
-        try (
-                Connection c = DriverManager.getConnection(CONNECTION);
-                PreparedStatement s2 = c.prepareStatement("UPDATE PlayTime SET time=time+?, lastLeave=? WHERE uuid=?");
-        ) {
-            s2.setLong(1, delayed);
-            s2.setLong(2, time);
-            s2.setString(3, p.getUniqueId().toString());
-            s2.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        switch (BungeeAPI.getServerType(MoonerBungee.port)) {
+            case MAIN_SERVER -> {
+                try (
+                        Connection c = DriverManager.getConnection(CONNECTION);
+                        PreparedStatement s2 = c.prepareStatement("UPDATE PlayTime SET main=? WHERE uuid=?");
+                ) {
+                    s2.setLong(1, p.getStatistic(Statistic.PLAY_ONE_MINUTE));
+                    s2.setString(2, p.getUniqueId().toString());
+                    s2.executeUpdate();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            case SURVIVAL_SERVER -> {
+                try (
+                        Connection c = DriverManager.getConnection(CONNECTION);
+                        PreparedStatement s2 = c.prepareStatement("UPDATE PlayTime SET sv=? WHERE uuid=?");
+                ) {
+                    s2.setLong(1, p.getStatistic(Statistic.PLAY_ONE_MINUTE));
+                    s2.setString(2, p.getUniqueId().toString());
+                    s2.executeUpdate();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            case SPAWN_SERVER -> {
+                try (
+                        Connection c = DriverManager.getConnection(CONNECTION);
+                        PreparedStatement s2 = c.prepareStatement("UPDATE PlayTime SET spawn=? WHERE uuid=?");
+                ) {
+                    s2.setLong(1, p.getStatistic(Statistic.PLAY_ONE_MINUTE));
+                    s2.setString(2, p.getUniqueId().toString());
+                    s2.executeUpdate();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }
