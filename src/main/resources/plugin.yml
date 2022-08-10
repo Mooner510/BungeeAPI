@@ -1,0 +1,4 @@
+name: MoonerBungeeAPI
+version: 1.0
+main: org.mooner.moonerbungeeapi.MoonerBungee
+api-version: 1.18
