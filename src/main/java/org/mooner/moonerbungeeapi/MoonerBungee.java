@@ -31,18 +31,18 @@ public final class MoonerBungee extends JavaPlugin implements Listener {
     public void onDisable() {
         // Plugin shutdown logic
         for (Player player : Bukkit.getOnlinePlayers()) {
-            PlayTimeDB.init.quit(player);
+            PlayTimeDB.init.savePlayTime(player);
         }
         this.getLogger().info("Plugin Disabled!");
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
-        PlayTimeDB.init.join(e.getPlayer());
+        PlayTimeDB.init.recordPlayTime(e.getPlayer());
     }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
-        PlayTimeDB.init.quit(e.getPlayer());
+        PlayTimeDB.init.savePlayTime(e.getPlayer());
     }
 }

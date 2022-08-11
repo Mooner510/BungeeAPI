@@ -37,7 +37,7 @@ public class PlayTimeDB {
                                 "uuid TEXT NOT NULL UNIQUE," +
                                 "main INTEGER," +
                                 "sv INTEGER," +
-                                "spawn INTEGER" +
+                                "spawn INTEGER," +
                                 "PRIMARY KEY(uuid))")
         ) {
             s.execute();
@@ -52,7 +52,7 @@ public class PlayTimeDB {
         final long delayed = time - lastJoin.get(p.getUniqueId());
         try (
                 Connection c = DriverManager.getConnection(CONNECTION);
-                PreparedStatement s = c.prepareStatement("SELECT (main, sv, spawn) FROM PlayTime WHERE uuid=?")
+                PreparedStatement s = c.prepareStatement("SELECT main, sv, spawn FROM PlayTime WHERE uuid=?")
         ) {
             s.setString(1, p.getUniqueId().toString());
             try (
@@ -68,20 +68,24 @@ public class PlayTimeDB {
         return delayed;
     }
 
-    public void join(Player p) {
+    public void recordPlayTime(Player p) {
         lastJoin.put(p.getUniqueId(), System.currentTimeMillis());
     }
 
-    public void quit(Player p) {
+    public void savePlayTime(Player p) {
         switch (BungeeAPI.getServerType(MoonerBungee.port)) {
             case MAIN_SERVER -> {
                 try (
                         Connection c = DriverManager.getConnection(CONNECTION);
                         PreparedStatement s2 = c.prepareStatement("UPDATE PlayTime SET main=? WHERE uuid=?");
+                        PreparedStatement s = c.prepareStatement("INSERT INTO PlayTime (uuid, main) VALUES(?, ?)")
                 ) {
-                    s2.setLong(1, p.getStatistic(Statistic.PLAY_ONE_MINUTE));
+                    s2.setInt(1, p.getStatistic(Statistic.PLAY_ONE_MINUTE));
                     s2.setString(2, p.getUniqueId().toString());
-                    s2.executeUpdate();
+                    if (s2.executeUpdate() == 0) {
+                        s.setString(1, p.getUniqueId().toString());
+                        s.setInt(1, p.getStatistic(Statistic.PLAY_ONE_MINUTE));
+                    }
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -90,10 +94,14 @@ public class PlayTimeDB {
                 try (
                         Connection c = DriverManager.getConnection(CONNECTION);
                         PreparedStatement s2 = c.prepareStatement("UPDATE PlayTime SET sv=? WHERE uuid=?");
+                        PreparedStatement s = c.prepareStatement("INSERT INTO PlayTime (uuid, sv) VALUES(?, ?)")
                 ) {
-                    s2.setLong(1, p.getStatistic(Statistic.PLAY_ONE_MINUTE));
+                    s2.setInt(1, p.getStatistic(Statistic.PLAY_ONE_MINUTE));
                     s2.setString(2, p.getUniqueId().toString());
-                    s2.executeUpdate();
+                    if (s2.executeUpdate() == 0) {
+                        s.setString(1, p.getUniqueId().toString());
+                        s.setInt(1, p.getStatistic(Statistic.PLAY_ONE_MINUTE));
+                    }
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -102,10 +110,14 @@ public class PlayTimeDB {
                 try (
                         Connection c = DriverManager.getConnection(CONNECTION);
                         PreparedStatement s2 = c.prepareStatement("UPDATE PlayTime SET spawn=? WHERE uuid=?");
+                        PreparedStatement s = c.prepareStatement("INSERT INTO PlayTime (uuid, spawn) VALUES(?, ?)")
                 ) {
-                    s2.setLong(1, p.getStatistic(Statistic.PLAY_ONE_MINUTE));
+                    s2.setInt(1, p.getStatistic(Statistic.PLAY_ONE_MINUTE));
                     s2.setString(2, p.getUniqueId().toString());
-                    s2.executeUpdate();
+                    if (s2.executeUpdate() == 0) {
+                        s.setString(1, p.getUniqueId().toString());
+                        s.setInt(1, p.getStatistic(Statistic.PLAY_ONE_MINUTE));
+                    }
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
