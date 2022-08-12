@@ -1,5 +1,6 @@
 package org.mooner.moonerbungeeapi.db;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Statistic;
 import org.bukkit.entity.Player;
 import org.mooner.moonerbungeeapi.MoonerBungee;
@@ -73,9 +74,7 @@ public class PlayTimeDB {
         lastJoin.put(p.getUniqueId(), System.currentTimeMillis());
     }
 
-    public void savePlayTime(Player p) {
-        final String uuid = p.getUniqueId().toString();
-        final int playTime = p.getStatistic(Statistic.PLAY_ONE_MINUTE);
+    private void save(Player p, int playTime, String uuid) {
         switch (BungeeAPI.getServerType(MoonerBungee.port)) {
             case MAIN_SERVER -> {
                 try (
@@ -130,4 +129,15 @@ public class PlayTimeDB {
             }
         }
     }
+
+    public void savePlayTime(Player p) {
+        save(p, p.getStatistic(Statistic.PLAY_ONE_MINUTE), p.getUniqueId().toString());
+    }
+
+    public void savePlayTimeAsync(Player p) {
+        final String uuid = p.getUniqueId().toString();
+        final int playTime = p.getStatistic(Statistic.PLAY_ONE_MINUTE);
+        Bukkit.getScheduler().runTaskLaterAsynchronously(MoonerBungee.plugin, () -> save(p, playTime, uuid), 5);
+    }
+
 }
