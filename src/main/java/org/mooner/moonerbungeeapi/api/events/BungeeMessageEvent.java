@@ -11,10 +11,10 @@ public class BungeeMessageEvent extends Event {
     private final Player player;
     private final String message;
 
-    public BungeeMessageEvent(String channel, Player player, byte[] message) {
+    public BungeeMessageEvent(String channel, Player player, String message) {
         this.channel = channel;
         this.player = player;
-        this.message = new String(message);
+        this.message = message;
     }
 
     public String getChannel() {
@@ -31,6 +31,10 @@ public class BungeeMessageEvent extends Event {
 
     @Override
     public HandlerList getHandlers() {
+        return handlerList;
+    }
+
+    public static HandlerList getHandlerList() {
         return handlerList;
     }
 }
