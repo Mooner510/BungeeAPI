@@ -90,9 +90,14 @@ public class KeyWordDB {
         if(w != null) return w;
         final String uuid = p.getUniqueId().toString();
         final KeyWords w2 = get(uuid);
-        if(w2 != null) return w2;
+        if(w2 != null) {
+            keyWords.put(p.getUniqueId(), w2);
+            return w2;
+        }
         save(uuid, "");
-        return new KeyWords();
+        final KeyWords w3 = new KeyWords();
+        keyWords.put(p.getUniqueId(), w3);
+        return w3;
     }
 
     public boolean check(Player p, String s) {

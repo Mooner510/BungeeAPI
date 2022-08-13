@@ -75,7 +75,6 @@ public class PlayerDB {
                     final ResultSet r = s.executeQuery()
             ) {
                 if (r.next()) {
-                    MoonerBungee.plugin.getLogger().info(r.getInt("main") + ", " + r.getInt("sv") + ", " + r.getInt("spawn"));
                     return r.getInt("main") + r.getInt("sv") + r.getInt("spawn") + delayed;
                 }
             }
