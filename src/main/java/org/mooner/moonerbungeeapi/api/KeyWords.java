@@ -11,11 +11,11 @@ public class KeyWords {
     }
 
     public KeyWords(String keys) {
-        this.keywords = new HashSet<>(List.of(keys.split(":")));
+        this.keywords = keys.isEmpty() ? new HashSet<>() : new HashSet<>(List.of(keys.split(":")));
     }
 
     public boolean addKeyWord(String s) {
-        if(keywords.size() >= 8 || s.contains(":") || s.length() > 12) return false;
+        if(s.isBlank() || keywords.size() >= 8 || s.contains(":") || s.length() > 12) return false;
         this.keywords.add(s);
         return true;
     }
@@ -25,10 +25,12 @@ public class KeyWords {
     }
 
     public boolean check(String s) {
+        if(keywords.isEmpty()) return false;
         return keywords.stream().anyMatch(s::contains);
     }
 
     public boolean contains(String s) {
+        if(keywords.isEmpty()) return false;
         return keywords.contains(s);
     }
 

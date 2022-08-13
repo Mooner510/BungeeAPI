@@ -33,7 +33,6 @@ public class BungeeAPI {
                 ByteArrayOutputStream b = new ByteArrayOutputStream();
                 DataOutputStream out = new DataOutputStream(b)
         ) {
-
             out.writeUTF("Message");
             out.writeUTF(player);
             out.writeUTF(message);
@@ -70,6 +69,7 @@ public class BungeeAPI {
         }
     }
 
+    @Deprecated
     public static void sendForward(String channel, String message) {
         try(
                 ByteArrayOutputStream b = new ByteArrayOutputStream();
@@ -90,7 +90,7 @@ public class BungeeAPI {
             if (!MoonerBungee.plugin.getServer().getOnlinePlayers().isEmpty()) {
                 MoonerBungee.plugin.getServer().getScheduler().runTaskAsynchronously(MoonerBungee.plugin, () -> {
                     Player p = MoonerBungee.plugin.getServer().getOnlinePlayers().iterator().next();
-                    p.sendPluginMessage(MoonerBungee.plugin, "BungeeCord", b.toByteArray());
+                    p.sendPluginMessage(MoonerBungee.plugin, "bungee:chat", b.toByteArray());
                 });
             }
         } catch (Exception e) {
@@ -98,6 +98,7 @@ public class BungeeAPI {
         }
     }
 
+    @Deprecated
     public static void sendForward(String player, String channel, String message) {
         try(
                 ByteArrayOutputStream b = new ByteArrayOutputStream();
@@ -106,21 +107,31 @@ public class BungeeAPI {
             out.writeUTF("Forward"); // So BungeeCord knows to forward it
             out.writeUTF(player);
             out.writeUTF(channel); // The channel name to check if this your data
-
-            ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
-            DataOutputStream msgout = new DataOutputStream(msgbytes);
-            msgout.writeUTF(message); // You can do anything you want with msgout
-            msgout.writeShort(123);
-
-            out.writeShort(msgbytes.toByteArray().length);
-            out.write(msgbytes.toByteArray());
+//
+//            ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
+//            DataOutputStream msgout = new DataOutputStream(msgbytes);
+//            msgout.writeUTF(message); // You can do anything you want with msgout
+            out.writeUTF(message);
 
             if (!MoonerBungee.plugin.getServer().getOnlinePlayers().isEmpty()) {
                 MoonerBungee.plugin.getServer().getScheduler().runTaskAsynchronously(MoonerBungee.plugin, () -> {
                     Player p = MoonerBungee.plugin.getServer().getOnlinePlayers().iterator().next();
-                    p.sendPluginMessage(MoonerBungee.plugin, "BungeeCord", b.toByteArray());
+                    p.sendPluginMessage(MoonerBungee.plugin, "bungee:chat", b.toByteArray());
                 });
             }
+        } catch (Exception e) {
+            MoonerBungee.plugin.getLogger().warning("Failed to send Forward. " + e.getMessage());
+        }
+    }
+
+    public static void sendMessage(Player p, String channel, String message) {
+        try(
+                ByteArrayOutputStream b = new ByteArrayOutputStream();
+                DataOutputStream out = new DataOutputStream(b)
+        ) {
+            out.writeUTF(channel);
+            out.writeUTF(message);
+            p.sendPluginMessage(MoonerBungee.plugin, "bungee:chat", b.toByteArray());
         } catch (Exception e) {
             MoonerBungee.plugin.getLogger().warning("Failed to send Forward. " + e.getMessage());
         }

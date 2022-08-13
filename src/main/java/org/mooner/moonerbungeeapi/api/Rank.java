@@ -3,11 +3,11 @@ package org.mooner.moonerbungeeapi.api;
 import org.bukkit.ChatColor;
 
 public enum Rank {
-    DEFAULT("&e[ &f유저 &e] &f", null),
-    CHAT("&3[ &f채팅 &3] &f", "rank.chat"),
+    ADMIN("&a[ &f관리자 &a] &f", "rank.admin"),
     DEVELOP("&d[ &f개발자 &d] &f", "rank.develop"),
     MANAGER("&b[ &f매니저 &b] &f", "rank.manager"),
-    ADMIN("&a[ &f관리자 &a] &f", "rank.admin");
+    CHAT("&3[ &f채팅 &3] &f", "rank.chat"),
+    DEFAULT("&e[ &f유저 &e] &f", null);
 
     private final String prefix;
     private final String permission;

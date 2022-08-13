@@ -15,12 +15,14 @@ import java.util.UUID;
 public class PlayerDB {
     public static PlayerDB init;
     private final HashMap<UUID, Long> lastJoin;
+    private final HashMap<UUID, Boolean> tutorial;
 
     private static final String dbPath = "../db/";
     private static final String CONNECTION = "jdbc:sqlite:" + dbPath + "playerData.db";
 
     public PlayerDB() {
         lastJoin = new HashMap<>();
+        tutorial = new HashMap<>();
 
         new File(dbPath).mkdirs();
         File db = new File(dbPath, "playerData.db");
@@ -153,7 +155,32 @@ public class PlayerDB {
         Bukkit.getScheduler().runTaskLaterAsynchronously(MoonerBungee.plugin, () -> save(p, playTime, uuid), 5);
     }
 
+    public boolean isTutorial(Player p) {
+        final Boolean b = tutorial.get(p.getUniqueId());
+        if(b != null) return b;
+        try (
+                Connection c = DriverManager.getConnection(CONNECTION);
+                PreparedStatement s = c.prepareStatement("SELECT done FROM Tutorial WHERE uuid=?")
+        ) {
+            s.setString(1, p.getUniqueId().toString());
+            try (
+                    final ResultSet r = s.executeQuery()
+            ) {
+                if (r.next()) {
+                    final boolean value = r.getBoolean(1);
+                    tutorial.put(p.getUniqueId(), value);
+                    return value;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        tutorial.put(p.getUniqueId(), false);
+        return false;
+    }
+
     public void setTutorial(Player p, boolean v) {
+        tutorial.put(p.getUniqueId(), v);
         String uuid = p.getUniqueId().toString();
         try (
                 Connection c = DriverManager.getConnection(CONNECTION);

@@ -10,8 +10,10 @@ import org.mooner.moonerbungeeapi.api.events.BungeeMessageEvent;
 public class BungeeListener implements PluginMessageListener {
     @Override
     public void onPluginMessageReceived(String channel, Player player, byte[] message) {
+//        MoonerBungee.plugin.getLogger().info(player.getName() + ": [" + channel + "] " + new String(message, StandardCharsets.UTF_8));
         ByteArrayDataInput in = ByteStreams.newDataInput(message);
         final String sub = in.readUTF();
-        Bukkit.getPluginManager().callEvent(new BungeeMessageEvent(sub, player, in.readUTF()));
+        final String msg = in.readUTF();
+        Bukkit.getPluginManager().callEvent(new BungeeMessageEvent(sub, player, msg));
     }
 }
