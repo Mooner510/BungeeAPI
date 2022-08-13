@@ -70,6 +70,7 @@ public final class MoonerBungee extends JavaPlugin implements Listener {
             } else {
                 final String s = String.join(" ", args);
                 if (KeyWordDB.init.removeKeyWord(p, s)) {
+                    p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_YES, 1, 1);
                     sender.sendMessage(chat("&3[ &f키워드 &3] &f성공적으로 &6" + s + " &f키워드를 &c제거&7했습니다."));
                 } else {
                     switch (KeyWordDB.init.addKeyWord(p, s)) {
