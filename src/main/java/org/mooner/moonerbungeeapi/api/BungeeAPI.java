@@ -130,6 +130,7 @@ public class BungeeAPI {
                 DataOutputStream out = new DataOutputStream(b)
         ) {
             out.writeUTF(channel);
+            out.writeUTF(p.getUniqueId().toString());
             out.writeUTF(message);
             p.sendPluginMessage(MoonerBungee.plugin, "bungee:chat", b.toByteArray());
         } catch (Exception e) {

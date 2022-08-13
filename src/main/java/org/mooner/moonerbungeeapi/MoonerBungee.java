@@ -14,6 +14,8 @@ import org.mooner.moonerbungeeapi.db.ChatDB;
 import org.mooner.moonerbungeeapi.db.KeyWordDB;
 import org.mooner.moonerbungeeapi.db.PlayerDB;
 
+import java.util.List;
+
 import static org.mooner.moonerbungeeapi.api.Rank.chat;
 
 public final class MoonerBungee extends JavaPlugin implements Listener {
@@ -62,9 +64,9 @@ public final class MoonerBungee extends JavaPlugin implements Listener {
                 if(!(sender instanceof Player p)) return true;
                 if (args.length == 0) {
                     sender.sendMessage(chat("&c사용법: /keyword <키워드>"));
-                    sender.sendMessage(chat("&e======== &a등록된 키워드 &e========"));
-                    for (String key : KeyWordDB.init.getKeyWords(p)) sender.sendMessage(chat("&a  - &6" + key));
-                    sender.sendMessage(chat("&e======== &a등록된 키워드 &e========"));
+                    final List<String> keyWords = KeyWordDB.init.getKeyWords(p);
+                    sender.sendMessage(chat("&e====== &a등록된 키워드 &7("+keyWords.size()+"개) &e======"));
+                    for (String key : keyWords) sender.sendMessage(chat("&a  - &6" + key));
                 } else {
                     final String s = String.join(" ", args);
                     if(KeyWordDB.init.removeKeyWord(p, s)) {
