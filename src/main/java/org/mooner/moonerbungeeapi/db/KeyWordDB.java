@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.mooner.moonerbungeeapi.MoonerBungee;
 import org.mooner.moonerbungeeapi.api.KeyWords;
+import org.mooner.moonerbungeeapi.api.KeywordResponse;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.util.UUID;
 public class KeyWordDB {
     public static KeyWordDB init;
     private final HashMap<UUID, KeyWords> keyWords;
+    public static final int maxKeyword = 8;
 
     private static final String dbPath = "../db/";
     private static final String CONNECTION = "jdbc:sqlite:" + dbPath + "keyword.db";
@@ -104,11 +106,12 @@ public class KeyWordDB {
         return getKeyWord(p).check(s);
     }
 
-    public boolean addKeyWord(Player p, String keyWorld) {
+    public KeywordResponse addKeyWord(Player p, String keyWorld) {
         final KeyWords words = getKeyWord(p);
-        if(!words.addKeyWord(keyWorld)) return false;
+        KeywordResponse r;
+        if((r = words.addKeyWord(keyWorld)) != KeywordResponse.COMPLETE) return r;
         save(p.getUniqueId().toString(), words.keys());
-        return true;
+        return r;
     }
 
     public boolean removeKeyWord(Player p, String keyWorld) {

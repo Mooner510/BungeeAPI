@@ -1,5 +1,7 @@
 package org.mooner.moonerbungeeapi.api;
 
+import org.mooner.moonerbungeeapi.db.KeyWordDB;
+
 import java.util.HashSet;
 import java.util.List;
 
@@ -14,10 +16,13 @@ public class KeyWords {
         this.keywords = keys.isEmpty() ? new HashSet<>() : new HashSet<>(List.of(keys.split(":")));
     }
 
-    public boolean addKeyWord(String s) {
-        if(s.isBlank() || keywords.size() >= 8 || s.contains(":") || s.length() > 12) return false;
+    public KeywordResponse addKeyWord(String s) {
+        if(s.isBlank()) return KeywordResponse.BLANK;
+        if(keywords.size() >= KeyWordDB.maxKeyword) return KeywordResponse.MAX_KEYWORD;
+        if(s.length() > 12) return KeywordResponse.TOO_MANY;
+        if(s.contains(":")) return KeywordResponse.BAD_WORD;
         this.keywords.add(s);
-        return true;
+        return KeywordResponse.COMPLETE;
     }
 
     public void removeKeyWord(String s) {

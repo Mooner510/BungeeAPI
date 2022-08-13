@@ -1,6 +1,7 @@
 package org.mooner.moonerbungeeapi;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -59,24 +60,35 @@ public final class MoonerBungee extends JavaPlugin implements Listener {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        switch (command.getName()) {
-            case "keyword" -> {
-                if(!(sender instanceof Player p)) return true;
-                if (args.length == 0) {
-                    sender.sendMessage(chat("&c사용법: /keyword <키워드>"));
-                    final List<String> keyWords = KeyWordDB.init.getKeyWords(p);
-                    sender.sendMessage(chat("&e====== &a등록된 키워드 &7("+keyWords.size()+"개) &e======"));
-                    for (String key : keyWords) sender.sendMessage(chat("&a  - &6" + key));
+        if ("keyword".equals(command.getName())) {
+            if (!(sender instanceof Player p)) return true;
+            if (args.length == 0) {
+                sender.sendMessage(chat("&c사용법: /keyword <키워드>"));
+                final List<String> keyWords = KeyWordDB.init.getKeyWords(p);
+                sender.sendMessage(chat("&e====== &a등록된 키워드 &7(" + keyWords.size() + "개) &e======"));
+                for (String key : keyWords) sender.sendMessage(chat("&a  - &6" + key));
+            } else {
+                final String s = String.join(" ", args);
+                if (KeyWordDB.init.removeKeyWord(p, s)) {
+                    sender.sendMessage(chat("&3[ &f키워드 &3] &f성공적으로 &6" + s + " &f키워드를 &c제거&7했습니다."));
                 } else {
-                    final String s = String.join(" ", args);
-                    if(KeyWordDB.init.removeKeyWord(p, s)) {
-                        sender.sendMessage(chat("&3[ &f키워드 &3] &f성공적으로 &6"+s+" &f키워드를 &c제거&7했습니다."));
-                    } else if (KeyWordDB.init.addKeyWord(p, s)) {
-                        sender.sendMessage(chat("&3[ &f키워드 &3] &f성공적으로 &6"+s+" &f키워드를 &a추가&7했습니다."));
+                    switch (KeyWordDB.init.addKeyWord(p, s)) {
+                        case MAX_KEYWORD ->
+                                sender.sendMessage(chat("&3[ &f키워드 &3] &c더는 키워드를 추가할 수 없습니다. &7(최대 " + KeyWordDB.maxKeyword + "개)"));
+                        case BLANK -> sender.sendMessage(chat("&3[ &f키워드 &3] &c추가할 키워드를 입력해주세요!"));
+                        case TOO_MANY ->
+                                sender.sendMessage(chat("&3[ &f키워드 &3] &c공백 포함 최대 12문자만 키워드 알림으로 설정할 수 있습니다."));
+                        case BAD_WORD -> sender.sendMessage(chat("&3[ &f키워드 &3] &c포함 불가능한 문자가 포함되었습니다."));
+                        case COMPLETE -> {
+                            p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_YES, 1, 1);
+                            sender.sendMessage(chat("&3[ &f키워드 &3] &f성공적으로 &6" + s + " &f키워드를 &a추가&7했습니다."));
+                            return true;
+                        }
                     }
+                    p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 1, 1);
                 }
-                return true;
             }
+            return true;
         }
         return false;
     }
