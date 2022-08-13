@@ -76,6 +76,24 @@ public class ChatDB {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        try (
+                Connection c = DriverManager.getConnection(CONNECTION);
+                PreparedStatement s = c.prepareStatement(
+                        "CREATE TABLE IF NOT EXISTS Whisper (" +
+                                "id INTEGER NOT NULL UNIQUE," +
+                                "from INTEGER NOT NULL," +
+                                "to INTEGER NOT NULL," +
+                                "server TEXT NOT NULL," +
+                                "message TEXT NOT NULL," +
+                                "timestamp INTEGER NOT NULL," +
+                                "PRIMARY KEY(id AUTOINCREMENT))")
+        ) {
+            s.execute();
+            MoonerBungee.plugin.getLogger().info("성공적으로 WhisperDB 를 생성했습니다.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public long getKey(UUID uuid) {
@@ -133,16 +151,32 @@ public class ChatDB {
     }
 
     public void command(Player p, String cmd) {
-        final long id = getKey(p.getUniqueId());
         final long time = System.currentTimeMillis();
         try (
                 Connection c = DriverManager.getConnection(CONNECTION);
                 PreparedStatement s = c.prepareStatement("INSERT INTO Command (playerId, server, prefix, cmd, timestamp) VALUES(?, ?, ?, ?, ?)")
         ) {
-            s.setLong(1, id);
+            s.setLong(1, getKey(p.getUniqueId()));
             s.setString(2, BungeeAPI.getServerType(MoonerBungee.port).getTag());
             s.setString(3, cmd.split(" ")[0]);
             s.setString(4, cmd);
+            s.setLong(5, time);
+            s.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void whisper(Player from, Player to, String msg) {
+        final long time = System.currentTimeMillis();
+        try (
+                Connection c = DriverManager.getConnection(CONNECTION);
+                PreparedStatement s = c.prepareStatement("INSERT INTO Whisper (from, to, server, message, timestamp) VALUES(?, ?, ?, ?, ?)")
+        ) {
+            s.setLong(1, getKey(from.getUniqueId()));
+            s.setLong(2, getKey(to.getUniqueId()));
+            s.setString(3, BungeeAPI.getServerType(MoonerBungee.port).getTag());
+            s.setString(4, msg);
             s.setLong(5, time);
             s.executeUpdate();
         } catch (SQLException e) {
