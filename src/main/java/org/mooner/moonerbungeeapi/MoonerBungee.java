@@ -65,7 +65,7 @@ public final class MoonerBungee extends JavaPlugin implements Listener {
             if (args.length == 0) {
                 sender.sendMessage(chat("&c사용법: /keyword <키워드>"));
                 final List<String> keyWords = KeyWordDB.init.getKeyWords(p);
-                sender.sendMessage(chat("&e====== &a등록된 키워드 &7(" + keyWords.size() + "개) &e======"));
+                sender.sendMessage(chat("&e====== &a등록된 키워드 &7(" + keyWords.size() + "/"+KeyWordDB.maxKeyword+"개) &e======"));
                 for (String key : keyWords) sender.sendMessage(chat("&a  - &6" + key));
             } else {
                 final String s = String.join(" ", args);
