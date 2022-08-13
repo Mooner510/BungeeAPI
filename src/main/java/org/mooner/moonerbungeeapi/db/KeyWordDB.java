@@ -1,8 +1,9 @@
-package org.mooner.moonerbungeeapi.api;
+package org.mooner.moonerbungeeapi.db;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.mooner.moonerbungeeapi.MoonerBungee;
+import org.mooner.moonerbungeeapi.api.KeyWords;
 
 import java.io.File;
 import java.io.IOException;

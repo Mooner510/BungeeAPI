@@ -12,18 +12,18 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class PlayTimeDB {
-    public static PlayTimeDB init;
+public class PlayerDB {
+    public static PlayerDB init;
     private final HashMap<UUID, Long> lastJoin;
 
     private static final String dbPath = "../db/";
-    private static final String CONNECTION = "jdbc:sqlite:" + dbPath + "playtime.db";
+    private static final String CONNECTION = "jdbc:sqlite:" + dbPath + "playerData.db";
 
-    public PlayTimeDB() {
+    public PlayerDB() {
         lastJoin = new HashMap<>();
 
         new File(dbPath).mkdirs();
-        File db = new File(dbPath, "playtime.db");
+        File db = new File(dbPath, "playerData.db");
         if(!db.exists()) {
             try {
                 db.createNewFile();
@@ -43,6 +43,19 @@ public class PlayTimeDB {
         ) {
             s.execute();
             MoonerBungee.plugin.getLogger().info("성공적으로 PlayerTimeDB 를 생성했습니다.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        try (
+                Connection c = DriverManager.getConnection(CONNECTION);
+                PreparedStatement s = c.prepareStatement(
+                        "CREATE TABLE IF NOT EXISTS Tutorial (" +
+                                "uuid TEXT NOT NULL UNIQUE," +
+                                "done INTEGER," +
+                                "PRIMARY KEY(uuid))")
+        ) {
+            s.execute();
+            MoonerBungee.plugin.getLogger().info("성공적으로 TutorialDB 를 생성했습니다.");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -140,4 +153,22 @@ public class PlayTimeDB {
         Bukkit.getScheduler().runTaskLaterAsynchronously(MoonerBungee.plugin, () -> save(p, playTime, uuid), 5);
     }
 
+    public void setTutorial(Player p, boolean v) {
+        String uuid = p.getUniqueId().toString();
+        try (
+                Connection c = DriverManager.getConnection(CONNECTION);
+                PreparedStatement s2 = c.prepareStatement("UPDATE Tutorial SET done=? WHERE uuid=?");
+                PreparedStatement s = c.prepareStatement("INSERT INTO Tutorial VALUES(?, ?)")
+        ) {
+            s2.setBoolean(1, v);
+            s2.setString(2, uuid);
+            if (s2.executeUpdate() == 0) {
+                s.setString(1, uuid);
+                s.setBoolean(2, v);
+                s.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

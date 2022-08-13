@@ -1,8 +1,6 @@
 package org.mooner.moonerbungeeapi;
 
 import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -10,10 +8,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.mooner.moonerbungeeapi.api.BungeeListener;
-import org.mooner.moonerbungeeapi.api.KeyWordDB;
-import org.mooner.moonerbungeeapi.db.PlayTimeDB;
-
-import static org.mooner.moonerbungeeapi.api.Rank.chat;
+import org.mooner.moonerbungeeapi.db.ChatDB;
+import org.mooner.moonerbungeeapi.db.PlayerDB;
 
 public final class MoonerBungee extends JavaPlugin implements Listener {
     public static MoonerBungee plugin;
@@ -27,30 +23,31 @@ public final class MoonerBungee extends JavaPlugin implements Listener {
         this.getLogger().info("Plugin Enabled!");
         Bukkit.getPluginManager().registerEvents(this, this);
         this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
-        this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+//        this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         this.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", new BungeeListener());
-        PlayTimeDB.init = new PlayTimeDB();
-        KeyWordDB.init = new KeyWordDB();
+        PlayerDB.init = new PlayerDB();
+        ChatDB.init = new ChatDB();
+//        KeyWordDB.init = new KeyWordDB();
     }
 
     @Override
     public void onDisable() {
         // Plugin shutdown logic
         for (Player player : Bukkit.getOnlinePlayers()) {
-            PlayTimeDB.init.savePlayTime(player);
+            PlayerDB.init.savePlayTime(player);
         }
         this.getLogger().info("Plugin Disabled!");
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
-        PlayTimeDB.init.recordPlayTime(e.getPlayer());
-        PlayTimeDB.init.savePlayTimeAsync(e.getPlayer());
+        PlayerDB.init.recordPlayTime(e.getPlayer());
+        PlayerDB.init.savePlayTimeAsync(e.getPlayer());
     }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
-        PlayTimeDB.init.savePlayTime(e.getPlayer());
+        PlayerDB.init.savePlayTime(e.getPlayer());
     }
 
 //    @Override
