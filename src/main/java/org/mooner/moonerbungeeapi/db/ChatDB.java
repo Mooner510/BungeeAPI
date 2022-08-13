@@ -82,8 +82,8 @@ public class ChatDB {
                 PreparedStatement s = c.prepareStatement(
                         "CREATE TABLE IF NOT EXISTS Whisper (" +
                                 "id INTEGER NOT NULL UNIQUE," +
-                                "from INTEGER NOT NULL," +
-                                "to INTEGER NOT NULL," +
+                                "sender INTEGER NOT NULL," +
+                                "receiver INTEGER NOT NULL," +
                                 "server TEXT NOT NULL," +
                                 "message TEXT NOT NULL," +
                                 "timestamp INTEGER NOT NULL," +
@@ -171,7 +171,7 @@ public class ChatDB {
         final long time = System.currentTimeMillis();
         try (
                 Connection c = DriverManager.getConnection(CONNECTION);
-                PreparedStatement s = c.prepareStatement("INSERT INTO Whisper (from, to, server, message, timestamp) VALUES(?, ?, ?, ?, ?)")
+                PreparedStatement s = c.prepareStatement("INSERT INTO Whisper (sender, receiver, server, message, timestamp) VALUES(?, ?, ?, ?, ?)")
         ) {
             s.setLong(1, getKey(from.getUniqueId()));
             s.setLong(2, getKey(to.getUniqueId()));
