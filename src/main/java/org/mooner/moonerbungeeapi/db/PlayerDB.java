@@ -88,7 +88,7 @@ public class PlayerDB {
         lastJoin.put(p.getUniqueId(), System.currentTimeMillis());
     }
 
-    private void save(Player p, int playTime, String uuid) {
+    private void save(String uuid, int playTime) {
         switch (BungeeAPI.getServerType(MoonerBungee.port)) {
             case MAIN_SERVER -> {
                 try (
@@ -145,13 +145,13 @@ public class PlayerDB {
     }
 
     public void savePlayTime(Player p) {
-        save(p, p.getStatistic(Statistic.PLAY_ONE_MINUTE), p.getUniqueId().toString());
+        save(p.getUniqueId().toString(), p.getStatistic(Statistic.PLAY_ONE_MINUTE));
     }
 
     public void savePlayTimeAsync(Player p) {
         final String uuid = p.getUniqueId().toString();
         final int playTime = p.getStatistic(Statistic.PLAY_ONE_MINUTE);
-        Bukkit.getScheduler().runTaskLaterAsynchronously(MoonerBungee.plugin, () -> save(p, playTime, uuid), 5);
+        Bukkit.getScheduler().runTaskLaterAsynchronously(MoonerBungee.plugin, () -> save(uuid, playTime), 5);
     }
 
     public boolean isTutorial(Player p) {

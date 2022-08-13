@@ -102,6 +102,18 @@ public class KeyWordDB {
         return w3;
     }
 
+    public void reloadKeyWord(Player p) {
+        final String uuid = p.getUniqueId().toString();
+        final KeyWords w2 = get(uuid);
+        if(w2 != null) {
+            keyWords.put(p.getUniqueId(), w2);
+            return;
+        }
+        save(uuid, "");
+        final KeyWords w3 = new KeyWords();
+        keyWords.put(p.getUniqueId(), w3);
+    }
+
     public boolean check(Player p, String s) {
         return getKeyWord(p).check(s);
     }

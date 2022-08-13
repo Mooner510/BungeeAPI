@@ -51,6 +51,7 @@ public final class MoonerBungee extends JavaPlugin implements Listener {
     public void onJoin(PlayerJoinEvent e) {
         PlayerDB.init.recordPlayTime(e.getPlayer());
         PlayerDB.init.savePlayTimeAsync(e.getPlayer());
+        KeyWordDB.init.reloadKeyWord(e.getPlayer());
     }
 
     @EventHandler
