@@ -2,7 +2,6 @@ package org.mooner.moonerbungeeapi.db;
 
 import org.bukkit.entity.Player;
 import org.mooner.moonerbungeeapi.MoonerBungee;
-import org.mooner.moonerbungeeapi.api.BungeeAPI;
 
 import java.io.File;
 import java.io.IOException;
@@ -96,13 +95,21 @@ public class ChatDB {
         }
     }
 
-    public long getKey(UUID uuid) {
-        Long i = key.get(uuid);
-        if(i != null) return i;
-        return getKeyFromDB(uuid);
+    public static long getKey(Player p) {
+        return ChatDB.init.getPlayerKey(p.getUniqueId());
     }
 
-    private long getKeyFromDB(UUID uuid) {
+    public static long getKey(UUID uuid) {
+        return ChatDB.init.getPlayerKey(uuid);
+    }
+
+    private long getPlayerKey(UUID uuid) {
+        Long i = key.get(uuid);
+        if(i != null) return i;
+        return getPlayerKeyFromDB(uuid);
+    }
+
+    private long getPlayerKeyFromDB(UUID uuid) {
         try (
                 Connection c = DriverManager.getConnection(CONNECTION);
                 PreparedStatement s = c.prepareStatement(
@@ -123,7 +130,7 @@ public class ChatDB {
                     ) {
                         s2.setString(1, uuid.toString());
                         s2.executeUpdate();
-                        return getKeyFromDB(uuid);
+                        return getPlayerKeyFromDB(uuid);
                     }
                 }
             }
@@ -134,14 +141,14 @@ public class ChatDB {
     }
 
     public void chat(Player p, String message) {
-        final long id = getKey(p.getUniqueId());
+        final long id = getPlayerKey(p.getUniqueId());
         final long time = System.currentTimeMillis();
         try (
                 Connection c = DriverManager.getConnection(CONNECTION);
                 PreparedStatement s = c.prepareStatement("INSERT INTO Chat (playerId, server, message, timestamp) VALUES(?, ?, ?, ?)")
         ) {
             s.setLong(1, id);
-            s.setString(2, BungeeAPI.getServerType(MoonerBungee.port).getTag());
+            s.setString(2, MoonerBungee.serverType.getTag());
             s.setString(3, message);
             s.setLong(4, time);
             s.executeUpdate();
@@ -156,8 +163,8 @@ public class ChatDB {
                 Connection c = DriverManager.getConnection(CONNECTION);
                 PreparedStatement s = c.prepareStatement("INSERT INTO Command (playerId, server, prefix, cmd, timestamp) VALUES(?, ?, ?, ?, ?)")
         ) {
-            s.setLong(1, getKey(p.getUniqueId()));
-            s.setString(2, BungeeAPI.getServerType(MoonerBungee.port).getTag());
+            s.setLong(1, getPlayerKey(p.getUniqueId()));
+            s.setString(2, MoonerBungee.serverType.getTag());
             s.setString(3, cmd.split(" ")[0]);
             s.setString(4, cmd);
             s.setLong(5, time);
@@ -173,9 +180,9 @@ public class ChatDB {
                 Connection c = DriverManager.getConnection(CONNECTION);
                 PreparedStatement s = c.prepareStatement("INSERT INTO Whisper (sender, receiver, server, message, timestamp) VALUES(?, ?, ?, ?, ?)")
         ) {
-            s.setLong(1, getKey(from.getUniqueId()));
-            s.setLong(2, getKey(to.getUniqueId()));
-            s.setString(3, BungeeAPI.getServerType(MoonerBungee.port).getTag());
+            s.setLong(1, getPlayerKey(from.getUniqueId()));
+            s.setLong(2, getPlayerKey(to.getUniqueId()));
+            s.setString(3, MoonerBungee.serverType.getTag());
             s.setString(4, msg);
             s.setLong(5, time);
             s.executeUpdate();

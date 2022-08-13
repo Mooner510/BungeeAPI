@@ -10,7 +10,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.mooner.moonerbungeeapi.api.BungeeAPI;
 import org.mooner.moonerbungeeapi.api.BungeeListener;
+import org.mooner.moonerbungeeapi.api.ServerType;
 import org.mooner.moonerbungeeapi.db.ChatDB;
 import org.mooner.moonerbungeeapi.db.KeyWordDB;
 import org.mooner.moonerbungeeapi.db.PlayerDB;
@@ -21,13 +23,14 @@ import static org.mooner.moonerbungeeapi.api.Rank.chat;
 
 public final class MoonerBungee extends JavaPlugin implements Listener {
     public static MoonerBungee plugin;
-    public static int port;
+    private static int port;
+    public static ServerType serverType;
 
     @Override
     public void onEnable() {
         // Plugin startup logic
         plugin = this;
-        port = Bukkit.getServer().getPort();
+        serverType = BungeeAPI.getServerType(Bukkit.getServer().getPort());
         this.getLogger().info("Plugin Enabled!");
         Bukkit.getPluginManager().registerEvents(this, this);
         this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");

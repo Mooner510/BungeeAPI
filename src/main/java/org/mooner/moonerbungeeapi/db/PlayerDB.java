@@ -10,12 +10,13 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.*;
 import java.util.HashMap;
-import java.util.UUID;
+
+import static org.mooner.moonerbungeeapi.db.ChatDB.getKey;
 
 public class PlayerDB {
     public static PlayerDB init;
-    private final HashMap<UUID, Long> lastJoin;
-    private final HashMap<UUID, Boolean> tutorial;
+    private final HashMap<Long, Long> lastJoin;
+    private final HashMap<Long, Boolean> tutorial;
 
     private static final String dbPath = "../db/";
     private static final String CONNECTION = "jdbc:sqlite:" + dbPath + "playerData.db";
@@ -37,11 +38,11 @@ public class PlayerDB {
                 Connection c = DriverManager.getConnection(CONNECTION);
                 PreparedStatement s = c.prepareStatement(
                         "CREATE TABLE IF NOT EXISTS PlayTime (" +
-                                "uuid TEXT NOT NULL UNIQUE," +
+                                "player INTEGER NOT NULL UNIQUE," +
                                 "main INTEGER," +
                                 "sv INTEGER," +
                                 "spawn INTEGER," +
-                                "PRIMARY KEY(uuid))")
+                                "PRIMARY KEY(player))")
         ) {
             s.execute();
             MoonerBungee.plugin.getLogger().info("성공적으로 PlayerTimeDB 를 생성했습니다.");
@@ -52,9 +53,9 @@ public class PlayerDB {
                 Connection c = DriverManager.getConnection(CONNECTION);
                 PreparedStatement s = c.prepareStatement(
                         "CREATE TABLE IF NOT EXISTS Tutorial (" +
-                                "uuid TEXT NOT NULL UNIQUE," +
+                                "player INTEGER NOT NULL UNIQUE," +
                                 "done INTEGER," +
-                                "PRIMARY KEY(uuid))")
+                                "PRIMARY KEY(player))")
         ) {
             s.execute();
             MoonerBungee.plugin.getLogger().info("성공적으로 TutorialDB 를 생성했습니다.");
@@ -65,12 +66,13 @@ public class PlayerDB {
 
     public long playTime(Player p) {
         final long time = System.currentTimeMillis();
-        final long delayed = time - lastJoin.get(p.getUniqueId());
+        final long key = getKey(p.getUniqueId());
+        final long delayed = time - lastJoin.get(key);
         try (
                 Connection c = DriverManager.getConnection(CONNECTION);
-                PreparedStatement s = c.prepareStatement("SELECT * FROM PlayTime WHERE uuid=?")
+                PreparedStatement s = c.prepareStatement("SELECT * FROM PlayTime WHERE player=?")
         ) {
-            s.setString(1, p.getUniqueId().toString());
+            s.setLong(1, key);
             try (
                     final ResultSet r = s.executeQuery()
             ) {
@@ -85,21 +87,21 @@ public class PlayerDB {
     }
 
     public void recordPlayTime(Player p) {
-        lastJoin.put(p.getUniqueId(), System.currentTimeMillis());
+        lastJoin.put(getKey(p.getUniqueId()), System.currentTimeMillis());
     }
 
-    private void save(String uuid, int playTime) {
-        switch (BungeeAPI.getServerType(MoonerBungee.port)) {
+    private void save(long key, int playTime) {
+        switch (MoonerBungee.serverType) {
             case MAIN_SERVER -> {
                 try (
                         Connection c = DriverManager.getConnection(CONNECTION);
-                        PreparedStatement s2 = c.prepareStatement("UPDATE PlayTime SET main=? WHERE uuid=?");
-                        PreparedStatement s = c.prepareStatement("INSERT INTO PlayTime (uuid, main) VALUES(?, ?)")
+                        PreparedStatement s2 = c.prepareStatement("UPDATE PlayTime SET main=? WHERE player=?");
+                        PreparedStatement s = c.prepareStatement("INSERT INTO PlayTime (player, main) VALUES(?, ?)")
                 ) {
                     s2.setInt(1, playTime);
-                    s2.setString(2, uuid);
+                    s2.setLong(2, key);
                     if (s2.executeUpdate() == 0) {
-                        s.setString(1, uuid);
+                        s2.setLong(1, key);
                         s.setInt(2, playTime);
                         s.executeUpdate();
                     }
@@ -110,13 +112,13 @@ public class PlayerDB {
             case SURVIVAL_SERVER -> {
                 try (
                         Connection c = DriverManager.getConnection(CONNECTION);
-                        PreparedStatement s2 = c.prepareStatement("UPDATE PlayTime SET sv=? WHERE uuid=?");
-                        PreparedStatement s = c.prepareStatement("INSERT INTO PlayTime (uuid, sv) VALUES(?, ?)")
+                        PreparedStatement s2 = c.prepareStatement("UPDATE PlayTime SET sv=? WHERE player=?");
+                        PreparedStatement s = c.prepareStatement("INSERT INTO PlayTime (player, sv) VALUES(?, ?)")
                 ) {
                     s2.setInt(1, playTime);
-                    s2.setString(2, uuid);
+                    s2.setLong(2, key);
                     if (s2.executeUpdate() == 0) {
-                        s.setString(1, uuid);
+                        s2.setLong(1, key);
                         s.setInt(2, playTime);
                         s.executeUpdate();
                     }
@@ -127,13 +129,13 @@ public class PlayerDB {
             case SPAWN_SERVER -> {
                 try (
                         Connection c = DriverManager.getConnection(CONNECTION);
-                        PreparedStatement s2 = c.prepareStatement("UPDATE PlayTime SET spawn=? WHERE uuid=?");
-                        PreparedStatement s = c.prepareStatement("INSERT INTO PlayTime (uuid, spawn) VALUES(?, ?)")
+                        PreparedStatement s2 = c.prepareStatement("UPDATE PlayTime SET spawn=? WHERE player=?");
+                        PreparedStatement s = c.prepareStatement("INSERT INTO PlayTime (player, spawn) VALUES(?, ?)")
                 ) {
                     s2.setInt(1, playTime);
-                    s2.setString(2, uuid);
+                    s2.setLong(2, key);
                     if (s2.executeUpdate() == 0) {
-                        s.setString(1, uuid);
+                        s2.setLong(1, key);
                         s.setInt(2, playTime);
                         s.executeUpdate();
                     }
@@ -145,21 +147,21 @@ public class PlayerDB {
     }
 
     public void savePlayTime(Player p) {
-        save(p.getUniqueId().toString(), p.getStatistic(Statistic.PLAY_ONE_MINUTE));
+        save(getKey(p), p.getStatistic(Statistic.PLAY_ONE_MINUTE));
     }
 
     public void savePlayTimeAsync(Player p) {
-        final String uuid = p.getUniqueId().toString();
+        final long key = getKey(p);
         final int playTime = p.getStatistic(Statistic.PLAY_ONE_MINUTE);
-        Bukkit.getScheduler().runTaskLaterAsynchronously(MoonerBungee.plugin, () -> save(uuid, playTime), 5);
+        Bukkit.getScheduler().runTaskLaterAsynchronously(MoonerBungee.plugin, () -> save(key, playTime), 5);
     }
 
     public boolean isTutorial(Player p) {
-        final Boolean b = tutorial.get(p.getUniqueId());
+        final Boolean b = tutorial.get(getKey(p));
         if(b != null) return b;
         try (
                 Connection c = DriverManager.getConnection(CONNECTION);
-                PreparedStatement s = c.prepareStatement("SELECT done FROM Tutorial WHERE uuid=?")
+                PreparedStatement s = c.prepareStatement("SELECT done FROM Tutorial WHERE player=?")
         ) {
             s.setString(1, p.getUniqueId().toString());
             try (
@@ -167,29 +169,29 @@ public class PlayerDB {
             ) {
                 if (r.next()) {
                     final boolean value = r.getBoolean(1);
-                    tutorial.put(p.getUniqueId(), value);
+                    tutorial.put(getKey(p), value);
                     return value;
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        tutorial.put(p.getUniqueId(), false);
+        tutorial.put(getKey(p), false);
         return false;
     }
 
     public void setTutorial(Player p, boolean v) {
-        tutorial.put(p.getUniqueId(), v);
-        String uuid = p.getUniqueId().toString();
+        final long key = getKey(p);
+        tutorial.put(key, v);
         try (
                 Connection c = DriverManager.getConnection(CONNECTION);
-                PreparedStatement s2 = c.prepareStatement("UPDATE Tutorial SET done=? WHERE uuid=?");
+                PreparedStatement s2 = c.prepareStatement("UPDATE Tutorial SET done=? WHERE player=?");
                 PreparedStatement s = c.prepareStatement("INSERT INTO Tutorial VALUES(?, ?)")
         ) {
             s2.setBoolean(1, v);
-            s2.setString(2, uuid);
+            s2.setLong(2, key);
             if (s2.executeUpdate() == 0) {
-                s.setString(1, uuid);
+                s.setLong(1, key);
                 s.setBoolean(2, v);
                 s.executeUpdate();
             }
