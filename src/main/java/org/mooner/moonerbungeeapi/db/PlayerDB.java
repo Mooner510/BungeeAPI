@@ -4,7 +4,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Statistic;
 import org.bukkit.entity.Player;
 import org.mooner.moonerbungeeapi.MoonerBungee;
-import org.mooner.moonerbungeeapi.api.BungeeAPI;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,14 +15,12 @@ import static org.mooner.moonerbungeeapi.db.ChatDB.getKey;
 public class PlayerDB {
     public static PlayerDB init;
     private final HashMap<Long, Long> lastJoin;
-    private final HashMap<Long, Boolean> tutorial;
 
     private static final String dbPath = "../db/";
     private static final String CONNECTION = "jdbc:sqlite:" + dbPath + "playerData.db";
 
     public PlayerDB() {
         lastJoin = new HashMap<>();
-        tutorial = new HashMap<>();
 
         new File(dbPath).mkdirs();
         File db = new File(dbPath, "playerData.db");
@@ -157,32 +154,26 @@ public class PlayerDB {
     }
 
     public boolean isTutorial(Player p) {
-        final Boolean b = tutorial.get(getKey(p));
-        if(b != null) return b;
         try (
                 Connection c = DriverManager.getConnection(CONNECTION);
                 PreparedStatement s = c.prepareStatement("SELECT done FROM Tutorial WHERE player=?")
         ) {
-            s.setString(1, p.getUniqueId().toString());
+            s.setLong(1, getKey(p));
             try (
                     final ResultSet r = s.executeQuery()
             ) {
                 if (r.next()) {
-                    final boolean value = r.getBoolean(1);
-                    tutorial.put(getKey(p), value);
-                    return value;
+                    return r.getBoolean(1);
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        tutorial.put(getKey(p), false);
         return false;
     }
 
     public void setTutorial(Player p, boolean v) {
         final long key = getKey(p);
-        tutorial.put(key, v);
         try (
                 Connection c = DriverManager.getConnection(CONNECTION);
                 PreparedStatement s2 = c.prepareStatement("UPDATE Tutorial SET done=? WHERE player=?");
