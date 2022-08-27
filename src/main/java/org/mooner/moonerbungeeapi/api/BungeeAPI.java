@@ -151,9 +151,7 @@ public class BungeeAPI {
 
     public static Rank getPlayerRank(Player p) {
         if(p.getName().equals("Mooner510")) return Rank.DEVELOP;
-        if(p.isOp()) {
-            return Rank.ADMIN;
-        }
+        if(p.isOp()) return Rank.ADMIN;
         for (Rank value : Rank.values()) {
             if (value.getPermission() != null && p.hasPermission(value.getPermission())) {
                 return value;
