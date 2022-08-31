@@ -127,9 +127,10 @@ public class ChatDB {
                 } else {
                     try (
                             Connection c2 = DriverManager.getConnection(CONNECTION);
-                            PreparedStatement s2 = c2.prepareStatement("INSERT INTO Player (uuid) VALUES(?)")
+                            PreparedStatement s2 = c2.prepareStatement("INSERT INTO Player (uuid, name) VALUES(?)")
                     ) {
                         s2.setString(1, uuid.toString());
+                        s2.setString(2, uuid.toString());
                         s2.executeUpdate();
                         return getPlayerKeyFromDB(uuid);
                     }
