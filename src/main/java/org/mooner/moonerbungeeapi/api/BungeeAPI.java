@@ -1,34 +1,82 @@
 package org.mooner.moonerbungeeapi.api;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.mooner.moonerbungeeapi.MoonerBungee;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.util.Collection;
 
 public class BungeeAPI {
+    public static void send(byte[] data, boolean async) {
+        final Collection<? extends Player> players = Bukkit.getOnlinePlayers();
+        if(players.isEmpty()) return;
+        Player p = players.iterator().next();
+        if(p == null) return;
+        if(async) {
+            MoonerBungee.plugin.getServer().getScheduler().runTaskAsynchronously(MoonerBungee.plugin, () ->
+                    p.sendPluginMessage(MoonerBungee.plugin, "BungeeCord", data)
+            );
+        } else {
+            p.sendPluginMessage(MoonerBungee.plugin, "BungeeCord", data);
+        }
+    }
+
+    public static void send(Player p, byte[] data, boolean async) {
+        if(p == null) return;
+        if(async) {
+            MoonerBungee.plugin.getServer().getScheduler().runTaskAsynchronously(MoonerBungee.plugin, () ->
+                    p.sendPluginMessage(MoonerBungee.plugin, "BungeeCord", data)
+            );
+        } else {
+            p.sendPluginMessage(MoonerBungee.plugin, "BungeeCord", data);
+        }
+    }
+
     public static void sendBungeeMessage(String message) {
+        sendBungeeMessage(message, true);
+    }
+
+    public static void sendBungeeMessage(String message, boolean async) {
         try(
                 ByteArrayOutputStream b = new ByteArrayOutputStream();
                 DataOutputStream out = new DataOutputStream(b)
         ) {
-
             out.writeUTF("Message");
             out.writeUTF("ALL");
             out.writeUTF(message);
 
-            if (!MoonerBungee.plugin.getServer().getOnlinePlayers().isEmpty()) {
-                MoonerBungee.plugin.getServer().getScheduler().runTaskAsynchronously(MoonerBungee.plugin, () -> {
-                    Player p = MoonerBungee.plugin.getServer().getOnlinePlayers().iterator().next();
-                    p.sendPluginMessage(MoonerBungee.plugin, "BungeeCord", b.toByteArray());
-                });
-            }
+            send(b.toByteArray(), async);
         } catch (Exception e) {
             MoonerBungee.plugin.getLogger().warning("Failed to send BungeeCord all message. " + e.getMessage());
         }
     }
 
+    public static void sendBungeeMessage(Player player, String message) {
+        sendBungeeMessage(player, message, true);
+    }
+
+    public static void sendBungeeMessage(Player player, String message, boolean async) {
+        try(
+                ByteArrayOutputStream b = new ByteArrayOutputStream();
+                DataOutputStream out = new DataOutputStream(b)
+        ) {
+            out.writeUTF("Message");
+            out.writeUTF(player.getName());
+            out.writeUTF(message);
+
+            send(player, b.toByteArray(), async);
+        } catch (Exception e) {
+            MoonerBungee.plugin.getLogger().warning("Failed to send BungeeCord message. " + e.getMessage());
+        }
+    }
+
     public static void sendBungeeMessage(String player, String message) {
+        sendBungeeMessage(player, message, true);
+    }
+
+    public static void sendBungeeMessage(String player, String message, boolean async) {
         try(
                 ByteArrayOutputStream b = new ByteArrayOutputStream();
                 DataOutputStream out = new DataOutputStream(b)
@@ -37,33 +85,41 @@ public class BungeeAPI {
             out.writeUTF(player);
             out.writeUTF(message);
 
-            if (!MoonerBungee.plugin.getServer().getOnlinePlayers().isEmpty()) {
-                MoonerBungee.plugin.getServer().getScheduler().runTaskAsynchronously(MoonerBungee.plugin, () -> {
-                    Player p = MoonerBungee.plugin.getServer().getOnlinePlayers().iterator().next();
-                    p.sendPluginMessage(MoonerBungee.plugin, "BungeeCord", b.toByteArray());
-                });
-            }
+            send(b.toByteArray(), async);
         } catch (Exception e) {
             MoonerBungee.plugin.getLogger().warning("Failed to send BungeeCord message. " + e.getMessage());
         }
     }
 
-    public static void sendBungeePlayer(String player, ServerType type) {
+    public static void sendBungeePlayer(Player player, ServerType type) {
         try(
                 ByteArrayOutputStream b = new ByteArrayOutputStream();
                 DataOutputStream out = new DataOutputStream(b)
         ) {
+            out.writeUTF("ConnectOther");
+            out.writeUTF(player.getName());
+            out.writeUTF(type.getTag());
 
+            send(player, b.toByteArray(), false);
+        } catch (Exception e) {
+            MoonerBungee.plugin.getLogger().warning("Failed to send BungeeCord player. " + e.getMessage());
+        }
+    }
+
+    public static void sendBungeePlayer(String player, ServerType type) {
+        sendBungeePlayer(player, type, false);
+    }
+
+    public static void sendBungeePlayer(String player, ServerType type, boolean async) {
+        try(
+                ByteArrayOutputStream b = new ByteArrayOutputStream();
+                DataOutputStream out = new DataOutputStream(b)
+        ) {
             out.writeUTF("ConnectOther");
             out.writeUTF(player);
             out.writeUTF(type.getTag());
 
-            if (!MoonerBungee.plugin.getServer().getOnlinePlayers().isEmpty()) {
-                MoonerBungee.plugin.getServer().getScheduler().runTaskAsynchronously(MoonerBungee.plugin, () -> {
-                    Player p = MoonerBungee.plugin.getServer().getOnlinePlayers().iterator().next();
-                    p.sendPluginMessage(MoonerBungee.plugin, "BungeeCord", b.toByteArray());
-                });
-            }
+            send(b.toByteArray(), async);
         } catch (Exception e) {
             MoonerBungee.plugin.getLogger().warning("Failed to send BungeeCord player. " + e.getMessage());
         }
