@@ -16,7 +16,8 @@ public class BungeeListener implements PluginMessageListener {
         ByteArrayDataInput in = ByteStreams.newDataInput(message);
         final String sub = in.readUTF();
         final UUID uuid = UUID.fromString(in.readUTF());
+        final String cleanMsg = in.readUTF();
         final String msg = in.readUTF();
-        Bukkit.getPluginManager().callEvent(new BungeeMessageEvent(sub, player, uuid, msg));
+        Bukkit.getPluginManager().callEvent(new BungeeMessageEvent(sub, player, uuid, cleanMsg, msg));
     }
 }

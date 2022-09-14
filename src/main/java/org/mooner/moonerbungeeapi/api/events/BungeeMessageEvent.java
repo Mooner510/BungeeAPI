@@ -12,12 +12,14 @@ public class BungeeMessageEvent extends Event {
     private final String channel;
     private final Player player;
     private final UUID uuid;
+    private final String cleanMessage;
     private final String message;
 
-    public BungeeMessageEvent(String channel, Player player, UUID uuid, String message) {
+    public BungeeMessageEvent(String channel, Player player, UUID uuid, String cleanMessage, String message) {
         this.channel = channel;
         this.player = player;
         this.uuid = uuid;
+        this.cleanMessage = cleanMessage;
         this.message = message;
     }
 
@@ -35,6 +37,10 @@ public class BungeeMessageEvent extends Event {
 
     public String getMessage() {
         return message;
+    }
+
+    public String getCleanMessage() {
+        return cleanMessage;
     }
 
     @Override

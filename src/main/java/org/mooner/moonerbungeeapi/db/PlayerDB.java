@@ -1,6 +1,7 @@
 package org.mooner.moonerbungeeapi.db;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Statistic;
 import org.bukkit.entity.Player;
 import org.mooner.moonerbungeeapi.MoonerBungee;
@@ -190,4 +191,25 @@ public class PlayerDB {
             e.printStackTrace();
         }
     }
+
+//    public void saveDeath(Player p, Location loc) {
+//        final long key = getKey(p);
+//        Bukkit.getScheduler().runTaskAsynchronously(MoonerBungee.plugin, () -> {
+//            try (
+//                    Connection c = DriverManager.getConnection(CONNECTION);
+//                    PreparedStatement s2 = c.prepareStatement("UPDATE Tutorial SET done=? WHERE player=?");
+//                    PreparedStatement s = c.prepareStatement("INSERT INTO Tutorial VALUES(?, ?)")
+//            ) {
+//                s2.setBoolean(1, v);
+//                s2.setLong(2, key);
+//                if (s2.executeUpdate() == 0) {
+//                    s.setLong(1, key);
+//                    s.setBoolean(2, v);
+//                    s.executeUpdate();
+//                }
+//            } catch (SQLException e) {
+//                e.printStackTrace();
+//            }
+//        });
+//    }
 }

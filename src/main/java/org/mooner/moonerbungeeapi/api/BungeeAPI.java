@@ -1,6 +1,7 @@
 package org.mooner.moonerbungeeapi.api;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.mooner.moonerbungeeapi.MoonerBungee;
 
@@ -188,6 +189,7 @@ public class BungeeAPI {
             out.writeUTF(channel);
             out.writeUTF(p.getUniqueId().toString());
             out.writeUTF(message);
+            out.writeUTF(ChatColor.stripColor(message));
             p.sendPluginMessage(MoonerBungee.plugin, "bungee:chat", b.toByteArray());
         } catch (Exception e) {
             MoonerBungee.plugin.getLogger().warning("Failed to send Forward. " + e.getMessage());
