@@ -2,6 +2,7 @@ package org.mooner.moonerbungeeapi.api;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.mooner.moonerbungeeapi.MoonerBungee;
 
@@ -207,13 +208,17 @@ public class BungeeAPI {
         return ServerType.OTHER;
     }
 
-    public static Rank getPlayerRank(Player p) {
-        if(p.getName().equals("Mooner510")) return Rank.DEVELOP;
+    public static Rank getPlayerRank(OfflinePlayer p) {
+        if(p.getName() != null && p.getName().equals("Mooner510")) return Rank.DEVELOP;
         if(p.isOp()) return Rank.ADMIN;
-        for (Rank value : Rank.values()) {
-            if (value.getPermission() != null && p.hasPermission(value.getPermission())) {
-                return value;
-            }
+        if(p.isOnline()) {
+            Player player = p.getPlayer();
+            if(player != null)
+                for (Rank value : Rank.values()) {
+                    if (value.getPermission() != null && player.hasPermission(value.getPermission())) {
+                        return value;
+                    }
+                }
         }
         return Rank.DEFAULT;
     }
